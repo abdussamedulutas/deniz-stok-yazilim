@@ -1,0 +1,19 @@
+@import "Cantarell/style.css";
+@import "FontAwesome/styles.min.css";
+@import "Icomoon/styles.css";
+html, body {
+  margin: 0;
+  font-family: "Cantarell";
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/*# sourceMappingURL=default.css.map */

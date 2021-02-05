@@ -1,0 +1,57 @@
+{
+  "name": "krex",
+  "version": "1.0.0",
+  "description": "Urgency",
+  "main": "main.js",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "keywords": [
+    "Electron",
+    "nodejs",
+    "react",
+    "sqlite3"
+  ],
+  "author": "saQut Software",
+  "license": "MIT",
+  "dependencies": {
+    "@material-ui/core": "^4.11.3",
+    "@material-ui/data-grid": "^4.0.0-alpha.18",
+    "electron": "^11.2.2",
+    "electron-builder": "^22.9.1",
+    "knex": "^0.21.17",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "^4.0.1",
+    "sass": "^1.32.6",
+    "sqlite3": "^5.0.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "compile": "sass ./src/;npm run build;"
+  },
+  "homepage": ".",
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
