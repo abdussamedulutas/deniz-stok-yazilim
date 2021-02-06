@@ -81,7 +81,7 @@ function TabPanel(props)
 {
     let isActive = props.value == props.index;
     if(isActive) document.title = props.title;
-    return <Box display={isActive ? "block" : "none"} overflow="auto">
+    return <Box display={isActive ? "block" : "none"} overflow="auto" height="100%">
         {props.children}
     </Box>;
 }

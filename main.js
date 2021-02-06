@@ -5,7 +5,7 @@ let {
     session
 } = require("electron");
 let fs = require("fs");
-global.debug = true;
+global.debug = false;
 class MyWindows{
     static show(p){
         return new MyWindows(p);
@@ -75,7 +75,9 @@ async function controlMain()
         })
     });
     app.setPath("userData",__dirname+"/profile");
-    await ModalWindow.show({page:"login",w:0.3,h:0.5});
-    main = MyWindows.show({page:"main",w:0.8,h:0.8});
+    if(await ModalWindow.show({page:"login",w:0.3,h:0.5}))
+    {
+         main = MyWindows.show({page:"main",w:0.8,h:0.8});
+    }else app.exit(0)
 }
 require("./bin/db.js")

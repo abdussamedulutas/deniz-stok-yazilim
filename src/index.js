@@ -2,6 +2,8 @@ import LoginScreen from "./Login.js";
 import MainScreen from "./Main.js";
 import { render } from "react-dom";
 import { useState } from "react";
+import {trTR} from "@material-ui/core/locale";
+import { createMuiTheme, ThemeProvider } from "@material-ui/core";
 let {ipcRenderer} = window.require("electron");
 
 
@@ -30,9 +32,11 @@ function Realitive(props)
             return <></>;
         }
     }
-}
-
+};
+const theme = createMuiTheme({},trTR);
 render(
-    <App />,
+    <ThemeProvider theme={theme}>
+     <App />
+    </ThemeProvider>,
     document.querySelector("#root")
 );
