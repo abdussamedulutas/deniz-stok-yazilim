@@ -5,35 +5,62 @@ let {
     session
 } = require("electron");
 let fs = require("fs");
-
+global.debug = true;
 class MyWindows{
-    static show(){
-        let u = new MyWindows();
+    static show(p){
+        return new MyWindows(p);
     }
-    constructor(){
+    static modal(p){
+        MyWindows.show(p)
+    }
+    constructor({page,parentWin,isModal,w,h}){
         let {screen} = require("electron");
         let size = screen.getPrimaryDisplay().workAreaSize
         this.window = new BrowserWindow({
-            width:size.width * 0.3,
-            height:size.height * 0.5,
+            width:size.width * w,
+            height:size.height * h,
             webPreferences:{
                 nodeIntegration:true,
                 defaultEncoding:"utf8"
             },
+            parent:parentWin,
+            modal:isModal?true:false,
             show:false
         });
         this.window.loadFile("./build/index.html");
-        MyWindows.window = this.window;
-        MyWindows.window.show();
-
+        if(!debug){
+            this.window.removeMenu()
+        }
+        this.window.webContents.on("dom-ready",() => {
+            this.window.webContents.send("show-page",page);
+            this.window.show()
+        });
     }
-    /**@type {BrowserWindow} */
-    static window;
+}
+class ModalWindow{
+    static async show(o){
+        return await new Promise(ok => {
+            let replied = false;
+            let mywin = MyWindows.show(o);
+            mywin.window.webContents.on("ipc-message",function(event,channel,pack){
+                if(channel == "reply"){
+                    replied = true;
+                    mywin.window.close();
+                    ok(pack);
+                }
+            })
+            mywin.window.on("close",function(){
+                !replied && ok(undefined)
+            })
+        })
+    }
 }
 
 
 
 app.on("ready", controlMain);
+
+let main = null;
 
 async function controlMain()
 {
@@ -48,6 +75,7 @@ async function controlMain()
         })
     });
     app.setPath("userData",__dirname+"/profile");
-    MyWindows.show();
+    await ModalWindow.show({page:"login",w:0.3,h:0.5});
+    main = MyWindows.show({page:"main",w:0.8,h:0.8});
 }
 require("./bin/db.js")

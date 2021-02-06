@@ -1,7 +1,24 @@
-const { fstat } = require("fs");
 let knex = require("knex");
 let fs = require("fs");
 let moment = require("moment");
+let crypto = require("crypto");
+function randomId()
+{
+    return crypto.randomBytes(16)
+}
+function sha256(str)
+{
+    let hash = crypto.createHash("sha256");
+    hash.update(str);
+    return hash.digest("hex");
+}
+let db = knex({
+    dialect:"sqlite",
+    connection:{
+        filename:"database/data.db",
+        charset:"utf8"
+    }
+});
 (async function(){
     let t = moment().format("D-M-YYYY");
     await new Promise(ok=>{
@@ -11,13 +28,6 @@ let moment = require("moment");
                 if(!err) ok();
             })
         })
-    });
-    let db = knex({
-        dialect:"sqlite",
-        connection:{
-            filename:"database/data.db",
-            charset:"utf8"
-        }
     });
     await db.schema.createTableIfNotExists("settings",function(table){
         table.text("name");
@@ -92,21 +102,22 @@ let moment = require("moment");
         table.binary("productid",16).notNullable();
     });
 
-    await db.table("settings").insert([{
-        name:"admin_password",
-        value:"123456"
-    },{
-        name:"admin_email",
-        value:"deniz@account"
-    }]);
-    await db.table("user").insert({
-        id:Buffer.alloc(16),
-        isim:"Abdussamed",
-        soyisim:"ULUTAŞ",
-        email:"abdussamed@account",
-        password:"123456",
-        descript:"Test KUllanıcı"
-    })
+    let k = await db.table("settings").where({name:"database"}).limit(1).first();
+    if(!k || k.value != "ready"){
+        await db.table("user").insert({
+            id:randomId(),
+            isim:"Abdussamed",
+            soyisim:"ULUTAŞ",
+            email:"abdussamed@account",
+            password:sha256("123456"),
+            descript:"Test KUllanıcı"
+        })
+        await db.table("settings").insert([{
+            name:"database",
+            value:"ready"
+        }]);
+    }
+    
 })();
 
 
@@ -184,3 +195,19 @@ odeme (payment)
     ıban        kart ibanı
     notes       açıklama
 */
+
+
+let {ipcMain} = require("electron");
+
+ipcMain.handle("auth",async function(event,ride,arg1,arg2){
+    switch(ride)
+    {
+        case "login":{
+            let user = await db.table("user").where({
+                password:sha256(arg2),
+                email:arg1
+            }).first();
+            return user?.id.toString("hex");
+        }
+    }
+})  

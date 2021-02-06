@@ -18,10 +18,13 @@
   "dependencies": {
     "@material-ui/core": "^4.11.3",
     "@material-ui/data-grid": "^4.0.0-alpha.18",
+    "@material-ui/icons": "^4.11.2",
+    "@material-ui/lab": "^4.0.0-alpha.57",
     "electron": "^11.2.2",
     "electron-builder": "^22.9.1",
     "knex": "^0.21.17",
     "moment": "^2.29.1",
+    "qrcode": "^1.4.4",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-router-dom": "^5.2.0",
