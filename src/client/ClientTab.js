@@ -14,12 +14,10 @@ import {
     Slide
 } from "@material-ui/core";
 import { DataGrid } from "@material-ui/data-grid";
-import { Add, Beenhere, MoreVert, Remove, Search } from "@material-ui/icons";
+import { Add, AssignmentInd, MoreVert, Remove, Search } from "@material-ui/icons";
 import { useEffect, useState } from "react";
 import "moment/locale/tr";
 import moment from "moment";
-import { Alert } from "@material-ui/lab";
-
 let { ipcRenderer } = window.require("electron");
 moment().locale("tr")
 export default function ProductTab(props)
@@ -32,7 +30,7 @@ export default function ProductTab(props)
 
 
     useEffect(function(){
-        ipcRenderer.invoke("db-get-products",{limit:1000}).then(function(_datas){
+        ipcRenderer.invoke("db-get-clients",{limit:1000}).then(function(_datas){
             setData(_datas)
         })
     },[update]);
@@ -45,12 +43,12 @@ export default function ProductTab(props)
         if(e.target.value)
         {
             search.timer = setTimeout(function(){
-                ipcRenderer.invoke("db-get-products",{search:e.target.value,limit:1000}).then(function(_datas){
+                ipcRenderer.invoke("db-get-clients",{search:e.target.value,limit:1000}).then(function(_datas){
                     setData(_datas)
                 })
             },250)
         }else{
-            ipcRenderer.invoke("db-get-products",{limit:1000}).then(function(_datas){
+            ipcRenderer.invoke("db-get-clients",{limit:1000}).then(function(_datas){
                 setData(_datas)
             })
         }
@@ -62,13 +60,12 @@ export default function ProductTab(props)
     }
     async function editBtn(id)
     {
-        await editProductModal(id);
+        await editClientModal(id);
         letUpdate(update + 1);
     }
-    
     async function acceptDelete()
     {
-        await ipcRenderer.invoke("db-delete-products",selectedRows);
+        await ipcRenderer.invoke("db-delete-clients",selectedRows);
         enableRemoveModal(false);
         letUpdate(update + 1);
         setMessager({
@@ -86,8 +83,8 @@ export default function ProductTab(props)
     return <>
         <Box display="flex" flexDirection="column" height="100%">
             <Box display="flex" marginBottom="20px">
-                <Beenhere style={verticalCenter}/>
-                <h3 style={{marginLeft:"10px",...verticalCenter,marginRight:"auto"}}>Tüm Ürünler</h3>
+                <AssignmentInd style={verticalCenter}/>
+                <h3 style={{marginLeft:"10px",...verticalCenter,marginRight:"auto"}}>Tüm Müşteriler</h3>
                 <div
                     style={verticalCenterR}
                 >
@@ -106,12 +103,12 @@ export default function ProductTab(props)
                     color="primary" 
                     style={verticalCenter}
                     onClick={async () => {
-                        await addProductModal();
+                        await addClientModal();
                         letUpdate(update + 1);
                     }}
                 >
                     <Add />
-                    Ürün Ekle 
+                    Müşteri Ekle 
                 </Button>
             </Box>
             <Box flex="1 1 auto" display="flex">
@@ -119,7 +116,7 @@ export default function ProductTab(props)
                     data={datas}
                     selectEvent={p => setSelectedRows(p)}
                     onDeleteProduct={removeBtn}
-                    onEditProduct={editBtn}
+                    onEditClient={editBtn}
                 />
             </Box>
             {selectedRows.length != 0 && <Box flex="0 0 40px" display="flex" marginTop="20px">
@@ -150,10 +147,10 @@ function RemoveHelperModal(props)
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
         >
-            <DialogTitle id="alert-dialog-title">Ürün Silme İşlemi</DialogTitle>
+            <DialogTitle id="alert-dialog-title">Müşteri Silme İşlemi</DialogTitle>
             <DialogContent>
                 <DialogContentText id="alert-dialog-description">
-                    {props.count} adet ürünü gerçekten silmek istiyor musunuz ?
+                    {props.count} adet müşteriyi gerçekten silmek istiyor musunuz ?
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
@@ -183,47 +180,35 @@ function ProductDataGrid(props)
             {
                 field:"isim",
                 headerName:"İsim",
+                renderCell:e => e.row.isim + " " +e.row.soyisim,
                 flex:30
             },
             {
-                field:"marka",
-                headerName:"Marka",
+                field:"telefon",
+                headerName:"Telefon No.",
                 flex:20
             },
             {
-                field:"model",
-                headerName:"Model",
+                field:"email",
+                headerName:"E-Mail Adresi",
                 flex:20
             },
             {
-                field:"birimfiyat",
-                headerName:"Fiyat",
-                renderCell:(e) => e.row.birimfiyati + " TL",
+                field:"address",
+                headerName:"Adres",
+                flex:20
+            },
+            {
+                field:"balance",
+                headerName:"Borç",
                 flex:10,
+                renderCell:(e) => e.row.balance + " TL",
                 sortComparator:(v1,v2)=> onlyNum(v1) - onlyNum(v2)
-            },
-            {
-                field:"renk",
-                headerName:"Renk",
-                flex:20
-            },
-            {
-                field:"kdv",
-                headerName:"K.D.V.",
-                flex:20,
-                sortComparator:(v1,v2)=> onlyNum(v1) - onlyNum(v2),
-                renderCell:e => e.row.kdv + "%",
-            },
-            {
-                field:"createdate",
-                headerName:"Ekleme Tarihi",
-                renderCell: e => moment(e.row.createdate).fromNow(),
-                flex:10
             },
             {
                 field:"I",
                 headerName:" ",
-                renderCell:(e)=> <ProductTabOptions onDeleteProduct={i=>props.onDeleteProduct(e.row.id)} onEditProduct={i=>props.onEditProduct(e.row.id)}/>,
+                renderCell:(e)=> <ClientTabOptions onDeleteClient={i=>props.onDeleteProduct(e.row.id)} onEditClient={i=>props.onEditClient(e.row.id)} />,
                 flex:5,
                 sortable:false,
                 filterable:false
@@ -246,7 +231,7 @@ function onlyNum(t)
         }else return T
     }
 }
-function ProductTabOptions(props)
+function ClientTabOptions(props)
 {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -257,12 +242,12 @@ function ProductTabOptions(props)
     function Edit()
     {
         handleClose();
-        props.onEditProduct && props.onEditProduct();
+        props.onEditClient && props.onEditClient();
     }
     function Delete()
     {
         handleClose();
-        props.onDeleteProduct && props.onDeleteProduct();
+        props.onDeleteClient && props.onDeleteClient();
     }
     
     const handleClose = () => {
@@ -290,11 +275,11 @@ function ProductTabOptions(props)
     </>
 }
 
-async function addProductModal()
+async function addClientModal()
 {
-    await ipcRenderer.invoke("addproduct-modal")
+    await ipcRenderer.invoke("addclient-modal")
 }
-async function editProductModal(id)
+async function editClientModal(id)
 {
-    await ipcRenderer.invoke("editproduct-modal",id)
+    await ipcRenderer.invoke("editclient-modal",id)
 }

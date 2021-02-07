@@ -7,6 +7,7 @@ import { useState } from "react";
 
 
 import ProductTab from "./products/ProductTab";
+import ClientTab from "./client/ClientTab";
 
 export default function MainScreen()
 {
@@ -48,7 +49,7 @@ export default function MainScreen()
                 <ProductTab />
             </TabPanel>
             <TabPanel value={value} index={2} title="Müşteriler">
-                2
+                <ClientTab />
             </TabPanel>
             <TabPanel value={value} index={3} title="Stoklar">
                 3

@@ -20,6 +20,7 @@
     "@material-ui/data-grid": "^4.0.0-alpha.18",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.57",
+    "cross-env": "^7.0.3",
     "electron": "^11.2.2",
     "electron-builder": "^22.9.1",
     "knex": "^0.21.17",
@@ -36,8 +37,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "compile": "sass ./src/;npm run build;"
+    "eject": "react-scripts eject"
   },
   "homepage": ".",
   "eslintConfig": {
@@ -57,5 +57,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "webpack-cli": "^4.5.0"
   }
 }
