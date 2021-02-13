@@ -2,10 +2,11 @@ let {
     app,
     BrowserWindow,
     TouchBarSlider,
-    session
+    session,
+    ipcMain
 } = require("electron");
 let fs = require("fs");
-global.debug = false;
+global.debug = true;
 class MyWindows{
     static show(p){
         return new MyWindows(p);
@@ -13,7 +14,7 @@ class MyWindows{
     static modal(p){
         MyWindows.show(p)
     }
-    constructor({page,parentWin,isModal,w,h}){
+    constructor({page,parentWin,isModal,w,h,args}){
         let {screen} = require("electron");
         let size = screen.getPrimaryDisplay().workAreaSize
         this.window = new BrowserWindow({
@@ -32,7 +33,7 @@ class MyWindows{
             this.window.removeMenu()
         }
         this.window.webContents.on("dom-ready",() => {
-            this.window.webContents.send("show-page",page);
+            this.window.webContents.send("show-page",page,args);
             this.window.show()
         });
     }
@@ -56,11 +57,16 @@ class ModalWindow{
     }
 }
 
-
+ipcMain.handle("modal",async function(event,page,...args){
+    return await ModalWindow.show({
+        page:page,
+        w:0.3,
+        h:0.5,
+        args:args
+    })
+})
 
 app.on("ready", controlMain);
-
-let main = null;
 
 async function controlMain()
 {
@@ -77,7 +83,7 @@ async function controlMain()
     app.setPath("userData",__dirname+"/profile");
     if(await ModalWindow.show({page:"login",w:0.3,h:0.5}))
     {
-         main = MyWindows.show({page:"main",w:0.8,h:0.8});
+        main = MyWindows.show({page:"main",w:0.8,h:0.8});
     }else app.exit(0)
 }
 require("./bin/db.js")

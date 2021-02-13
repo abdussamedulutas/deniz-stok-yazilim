@@ -40,7 +40,6 @@ let db = knex({
         table.text("soyisim");
         table.text("email").notNullable();
         table.text("password").notNullable();
-
         table.text("descript");
         table.dateTime("createdate").notNullable().defaultTo(db.fn.now());
         table.dateTime("updatedate").notNullable().defaultTo(db.fn.now());
@@ -51,8 +50,12 @@ let db = knex({
 
         table.text("isim");
         table.text("soyisim");
-
+        table.text("phone");
+        table.text("email");
+        table.double("balance");
+        table.text("address");
         table.text("descript");
+        
         table.dateTime("createdate").notNullable().defaultTo(db.fn.now());
         table.dateTime("updatedate").notNullable().defaultTo(db.fn.now());
         table.dateTime("deletedate").nullable();
@@ -210,4 +213,66 @@ ipcMain.handle("auth",async function(event,ride,arg1,arg2){
             return user?.id.toString("hex");
         }
     }
-})  
+});
+ipcMain.handle("db",async function(event,pack){
+    switch(pack.action)
+    {
+        case "add":{
+            let id = randomId();
+            pack.data.id = id;
+            await db.table(pack.class).insert(pack.data);
+            return id.toString("hex")
+        }
+        case "update":{
+            await db.table(pack.class).update(pack.data).where({
+                id:Buffer.from(pack.id,"hex")
+            });
+            return id.toString("hex")
+        }
+        case "list":{
+            let sql = db.table(pack.class).select(pack.column ? pack.column : "*");
+            if(pack.withDeleted == null) sql.whereNull("deletedate");
+            else if(pack.onlyDeleted) sql.whereNotNull("deletedate");
+            if(typeof pack.limit == "number")  sql.limit(pack.limit);
+            if(typeof pack.offset == "number")  sql.offset(pack.offset);
+            if(pack.filter){
+                sql.where(pack.filter)
+            };
+            if(pack.id){
+                sql.where({
+                    id:Buffer.from(pack.id,"hex")
+                })
+            };
+            return (await sql).map(idBufferToHex);
+        }
+        case "get":{
+            return idBufferToHex(
+                await db.table(pack.class).select("*").where({
+                    id:Buffer.from(pack.id,"hex")
+                }).limit(1).first()
+            )
+        }
+        case "search":{
+            let t = db.table(pack.class);
+            if(pack.withDeleted == null) sql.whereNull("deletedate");
+            if(typeof pack.limit == "number")  sql.limit(pack.limit);
+            if(typeof pack.offset == "number")  sql.offset(pack.offset);
+            for(let key in pack.data)
+            {
+                let value = pack.data[key];
+                t.where(key,'like','%'+value+'%')
+            };
+            return (await t).map(idBufferToHex);
+        }
+        case "delete":{
+            return await db.table(pack.class).select("*").where({
+                id:Buffer.from(pack.id,"hex")
+            })
+        }
+    }
+})
+function idBufferToHex(i)
+{
+    if(i.id) i.id = i.id.toString("hex");
+    return i;
+}

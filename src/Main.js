@@ -2,7 +2,7 @@ import {Tab, Tabs,Box, Divider,Icon} from "@material-ui/core";
 import {
     AssignmentInd, Beenhere, CloudDownloadOutlined, Description, History, Person, PhoneInTalk, SaveAlt, Settings, ShoppingCart
 } from "@material-ui/icons";
-import "./styles/Login.css";
+import "./styles/default.css";
 import { useState } from "react";
 
 
@@ -79,7 +79,7 @@ export default function MainScreen()
 }
 function TabPanel(props)
 {
-    let isActive = props.value == props.index;
+    let isActive = props.value === props.index;
     if(isActive) document.title = props.title;
     return <Box display={isActive ? "block" : "none"} overflow="auto" height="100%">
         {props.children}
