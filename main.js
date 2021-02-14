@@ -84,9 +84,9 @@ async function controlMain()
         })
     });
     app.setPath("userData",__dirname+"/profile");
-    if(await ModalWindow.show({page:"login",w:0.3,h:0.5}))
-    {
+    //if(await ModalWindow.show({page:"login",w:0.3,h:0.5}))
+    //{
         main = MyWindows.show({page:"main",w:0.8,h:0.8});
-    }else app.exit(0)
+    //}else app.exit(0)
 }
 require("./bin/db.js")

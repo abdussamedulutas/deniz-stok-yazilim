@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Button, IconButton, InputAdornment, Menu,MenuItem, TextField } from "@material-ui/core";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, InputAdornment, Menu,MenuItem, TextField } from "@material-ui/core";
 import { ApiContext, DataGrid } from "@material-ui/data-grid";
 import { Add, Beenhere, Description, MoreVert, PinDropSharp, Remove, Search } from "@material-ui/icons";
 let {ipcRenderer} = window.require("electron");
@@ -7,23 +7,8 @@ let {ipcRenderer} = window.require("electron");
 export default function ProductTab()
 {
     let verticalCenter =  {marginTop:"auto",marginBottom:"auto"};
-    let [rows,setRows] = useState([{
-        id:6,
-        marka:"Samsung",
-        model:"A2 Core",
-        fiyat:"1500",
-        renk:"Lacivert",
-        kdv:"14.5",
-        stok:14
-    },{
-        id:7,
-        marka:"Vodafone",
-        model:"Red MI 12",
-        fiyat:"4000",
-        renk:"Beyaz",
-        kdv:"8",
-        stok:25
-    }]);
+    let [rows,setRows] = useState([]);
+    let [deleteRows,setDeleteRow] = useState([]);
 
     async function updateData()
     {
@@ -32,13 +17,34 @@ export default function ProductTab()
             class:"product"
         });
         setRows(rows);
-    }
+    };
+    updateData();
     async function handleProductAdd()
     {
         await ipcRenderer.invoke("modal","addproduct");
         await updateData();
     }
-
+    async function handleProductEdit(id)
+    {
+        console.log(id);
+        await ipcRenderer.invoke("modal","updateproduct",id);
+        await updateData();
+    }
+    async function handleDelete(ids)
+    {
+        console.log(ids);
+        setDeleteRow(ids);
+    }
+    async function handleDeleteProduct()
+    {
+        await ipcRenderer.invoke("db",{
+            action:"delete",
+            class:"product",
+            id:deleteRows instanceof Array ? deleteRows : [deleteRows]
+        });
+        await updateData();
+        setDeleteRow([]);
+    }
     return <Box display="flex" flexDirection="column" height="100%">
         <Box display="flex" marginBottom="20px">
             <Beenhere style={verticalCenter}/>
@@ -67,8 +73,30 @@ export default function ProductTab()
             </Button>
         </Box>
         <ProductGrid
+            onDeleteItem={handleDelete}
+            onEditItem={handleProductEdit}
             row={rows}
         />
+        <Dialog
+            open={deleteRows.length != 0}
+            onClose={() => setDeleteRow([])}
+        >
+            <DialogTitle>Dikkat !</DialogTitle>
+            <DialogContent>
+                <DialogContentText>
+                    {deleteRows.length} adet ürünü sistemden kaldırmak istiyor musunuz?
+                </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+                <Button color="primary" onClick={() => setDeleteRow([])}>
+                    İptal
+                </Button>
+                <Button color="secondary" onClick={handleDeleteProduct}>
+                    Sil
+                </Button>
+            </DialogActions>
+        </Dialog>
+
     </Box>
 }
 function ProductTabOptions(props)
@@ -76,16 +104,16 @@ function ProductTabOptions(props)
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
   
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
+    const handleClick = (e) => {
+        setAnchorEl(e.target);
     };
     const handleEdit = e => {
-        handleClick();
-        props.onEditItem && props.onEditItem();
+        handleClose();
+        props.onEditItem && props.onEditItem(props.row.id);
     };
     const handleDelete = e => {
-        handleClick();
-        props.onDeleteItem && props.onDeleteItem();
+        handleClose();
+        props.onDeleteItem && props.onDeleteItem([props.row.id]);
     };
   
     const handleClose = () => {
@@ -116,8 +144,10 @@ function ProductTabOptions(props)
 function ProductGrid(props)
 {
     let [selectedItem,setSelectedItems] = useState([]);
-    function p(k){
-        k = k.toString().split('.');
+    function p(fiyat,vergi){
+        let perctangle = parseFloat(vergi) / 100;
+        let result = fiyat * perctangle;
+        let k = result.toString().split('.');
         return k[0] + (k[1]?'.'+k[1].slice(0,2):'')
     }
     const handleSelected = e => {
@@ -125,10 +155,10 @@ function ProductGrid(props)
         props.onSelectionChanged && props.onSelectionChanged(e.rowIds);
     };
     const handleEdit = e => {
-        props.onEditItem && props.onEditItem(selectedItem);
+        props.onEditItem && props.onEditItem(typeof e == "number" ? e : selectedItem[0]);
     };
     const handleDelete = e => {
-        props.onDeleteItem && props.onDeleteItem(selectedItem);
+        props.onDeleteItem && props.onDeleteItem(e instanceof Array ? e : selectedItem);
     };
     return <>
     <Box flex="1 1 auto" display="flex">
@@ -154,7 +184,7 @@ function ProductGrid(props)
                     flex:20
                 },
                 {
-                    field:"fiyat",
+                    field:"satisfiyati",
                     headerName:"Fiyat",
                     flex:10,
                     type:"number",
@@ -170,7 +200,7 @@ function ProductGrid(props)
                     headerName:"K.D.V.",
                     flex:10,
                     type:"number",
-                    renderCell:(e)=> e.value + "% (" + p(parseFloat(e.row.fiyat) * parseFloat("0."+e.value)) + "TL)",
+                    renderCell:(e)=> e.value + "% (" + p(e.row.satisfiyati,e.value) + "TL)",
                 },
                 {
                     field:"stok",
@@ -182,7 +212,7 @@ function ProductGrid(props)
                 {
                     field:"I",
                     headerName:" ",
-                    renderCell:(e)=> <ProductTabOptions onEditItem={handleEdit} onDeleteItem={handleDelete} />,
+                    renderCell:(e)=> <ProductTabOptions row={e.row} onEditItem={handleEdit} onDeleteItem={handleDelete} />,
                     flex:5,
                     sortable:false,
                     filterable:false
@@ -200,7 +230,7 @@ function ProductGrid(props)
             <Description />
             Seçileni Düzenle
         </Button>}
-        <Button variant="outlined" style={{marginLeft:"10px"}} onClick={handleEdit}>
+        <Button variant="outlined" style={{marginLeft:"10px"}} onClick={handleEdit} >
             <Description />
             Fatura Oluştur
         </Button>

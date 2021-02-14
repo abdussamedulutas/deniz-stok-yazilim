@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {Box, Button, TextField} from "@material-ui/core";
 import {Alert} from "@material-ui/lab";
 let {ipcRenderer} = window.require("electron");
 
-export default function AddProduct(props)
+export default function UpdateProduct(props)
 {
     let [errorMessage,setErrorMessage] = useState(false);
     let [successMessage,setSuccessMessage] = useState(false);
@@ -20,6 +20,13 @@ export default function AddProduct(props)
         stok:"",
         descript:""
     });
+    useEffect(function(){
+        ipcRenderer.invoke("db",{
+            action:"get",
+            class:"product",
+            id:props.args[0]
+        }).then(_product => setDetails(_product))
+    },[props.args[0]]);
     function handleChange(name,value){
         let nproduct = {
             ...product,
@@ -42,17 +49,18 @@ export default function AddProduct(props)
             return;
         };
         await ipcRenderer.invoke("db",{
-            action:"add",
+            action:"update",
             class:"product",
+            id:props.args[0],
             data:product
         });
-        setSuccessMessage("Bilgiler Başarıyla Kaydedildi");
+        setSuccessMessage("Bilgiler Başarıyla Güncellendi");
         setTimeout(function(){
             ipcRenderer.send("reply",true)
         },500)
     }
 
-    document.title = "Ürün Ekleme Formu";
+    document.title = "Ürün Güncelleme Formu";
     let styles = {
         marginTop:"auto",
         marginBottom:"auto"
@@ -66,44 +74,44 @@ export default function AddProduct(props)
                 </Box>
                 <Box style={styles} display="flex" flexDirection="row">
                     <Box marginBottom="10px" flex="1 1 auto">
-                        <TextField label="Ürün İsmi" fullWidth ariant="outlined" onKeyUp={e=>handleChange("isim",e.target.value)} autoFocus/>
+                        <TextField value={product.isim} label="Ürün İsmi" fullWidth ariant="outlined" onChange={e=>handleChange("isim",e.target.value)} autoFocus/>
                     </Box>
                 </Box>
                 <Box style={styles} display="flex" flexDirection="row">
                     <Box marginBottom="10px" flex="1 1 auto">
-                        <TextField label="Ürün Markası" fullWidth ariant="outlined" onKeyUp={e=>handleChange("marka",e.target.value)}/>
+                        <TextField value={product.marka} label="Ürün Markası" fullWidth ariant="outlined" onChange={e=>handleChange("marka",e.target.value)}/>
                     </Box>
                     <Box marginBottom="10px" marginLeft="10px" flex="1 1 auto">
-                        <TextField label="Ürün Modeli" fullWidth ariant="outlined" onKeyUp={e=>handleChange("model",e.target.value)}/>
+                        <TextField value={product.model} label="Ürün Modeli" fullWidth ariant="outlined" onChange={e=>handleChange("model",e.target.value)}/>
                     </Box>
                 </Box>
                 <Box style={styles} display="flex" flexDirection="row" marginBottom="10px">
                     <Box marginBottom="10px" flex="1 1 auto">
-                        <TextField type="number" label="Ürün Alış Fiyatı" fullWidth ariant="outlined" onKeyUp={e=>handleChange("alisfiyati",e.target.value)}/>
+                        <TextField value={product.alisfiyati} type="number" label="Ürün Alış Fiyatı" fullWidth ariant="outlined" onChange={e=>handleChange("alisfiyati",e.target.value)}/>
                     </Box>
                     <Box marginLeft="10px" flex="1 1 auto">
-                        <TextField type="number" label="Ürün Satış Fiyatı" fullWidth ariant="outlined" onKeyUp={e=>handleChange("satisfiyati",e.target.value)}/>
+                        <TextField value={product.satisfiyati} type="number" label="Ürün Satış Fiyatı" fullWidth ariant="outlined" onChange={e=>handleChange("satisfiyati",e.target.value)}/>
                     </Box>
                 </Box>
                 <Box style={styles} display="flex" flexDirection="row" marginBottom="10px">
                     <Box marginBottom="10px" flex="1 1 auto">
-                        <TextField type="number" label="Katkı Değer Vegisi (%)" fullWidth ariant="outlined" onKeyUp={e=>handleChange("kdv",e.target.value)}/>
+                        <TextField value={product.kdv} type="number" label="Katkı Değer Vegisi (%)" fullWidth ariant="outlined" onChange={e=>handleChange("kdv",e.target.value)}/>
                     </Box>
                     <Box marginLeft="10px" flex="1 1 auto">
-                        <TextField type="number" label="Stok Adedi" fullWidth ariant="outlined" onKeyUp={e=>handleChange("stok",e.target.value)}/>
+                        <TextField value={product.stok} type="number" label="Stok Adedi" fullWidth ariant="outlined" onChange={e=>handleChange("stok",e.target.value)}/>
                     </Box>
                 </Box>
                 <Box style={styles} display="flex" flexDirection="row" marginBottom="10px">
                     <Box marginBottom="10px" flex="1 1 auto">
-                        <TextField label="Ürün Barkod" fullWidth ariant="outlined" onKeyUp={e=>handleChange("barkod",e.target.value)}/>
+                        <TextField value={product.barkod} label="Ürün Barkod" fullWidth ariant="outlined" onChange={e=>handleChange("barkod",e.target.value)}/>
                     </Box>
                     <Box marginLeft="10px" flex="1 1 auto">
-                        <TextField label="Ürün Rengi" fullWidth ariant="outlined" onKeyUp={e=>handleChange("renk",e.target.value)}/>
+                        <TextField value={product.renk} label="Ürün Rengi" fullWidth ariant="outlined" onChange={e=>handleChange("renk",e.target.value)}/>
                     </Box>
                 </Box>
                 <Box style={styles} display="flex" flexDirection="row" marginBottom="10px">
                     <Box marginBottom="10px" flex="1 1 auto">
-                        <TextField multiline rows="3" label="Açıklama" fullWidth ariant="outlined" onKeyUp={e=>handleChange("descript",e.target.value)}/>
+                        <TextField value={product.descript} multiline rows="3" label="Açıklama" fullWidth ariant="outlined" onChange={e=>handleChange("descript",e.target.value)}/>
                     </Box>
                 </Box>
                 {!successMessage && showSave && <Box style={styles} textAlign="center">

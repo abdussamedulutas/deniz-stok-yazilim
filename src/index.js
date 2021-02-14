@@ -1,6 +1,7 @@
-import LoginScreen from "./Login.js";
-import MainScreen from "./Main.js";
-import AddProduct from "./products/AddProduct.js";
+import LoginScreen from "./Login";
+import MainScreen from "./Main";
+import AddProductScreen from "./products/AddProduct.js";
+import UpdateProductScreen from "./products/UpdateProduct";
 
 
 import { render } from "react-dom";
@@ -37,7 +38,10 @@ function Realitive(props)
             return <MainScreen args={props.args}/>;
         }
         case "addproduct":{
-            return <AddProduct args={props.args}/>;
+            return <AddProductScreen args={props.args}/>;
+        }
+        case "updateproduct":{
+            return <UpdateProductScreen args={props.args}/>;
         }
         default:return <></>;
     }

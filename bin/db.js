@@ -254,9 +254,15 @@ ipcMain.handle("db",async function(event,pack){
             return (await t).map(idBufferToHex);
         }
         case "delete":{
-            return await db.table(pack.class).select("*").where({
-                id:Buffer.from(pack.id,"hex")
-            })
+            if(typeof pack.id == "number")
+            {
+                return await db.table(pack.class).delete().where({
+                    id:Buffer.from(pack.id,"hex")
+                })
+            }else{
+                let ids = pack.id.map(i => Buffer.from(i,"hex"));
+                return await db.table(pack.class).delete().whereIn("id",ids)
+            }
         }
     }
 })
