@@ -58,7 +58,10 @@ class ModalWindow{
 }
 
 ipcMain.handle("modal",async function(event,page,...args){
+    let parentWin = BrowserWindow.fromWebContents(event.sender);
     return await ModalWindow.show({
+        parentWin:parentWin,
+        isModal:true,
         page:page,
         w:0.3,
         h:0.5,

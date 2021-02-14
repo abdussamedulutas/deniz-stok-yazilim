@@ -67,22 +67,11 @@ let db = knex({
         table.text("marka");
         table.text("model");
         table.string("barkod");
-        table.double("birimfiyati");
+        table.double("satisfiyati");
         table.double("kdv");
         table.string("renk");
-
-        table.text("descript");
-        table.dateTime("createdate").notNullable().defaultTo(db.fn.now());
-        table.dateTime("updatedate").notNullable().defaultTo(db.fn.now());
-        table.dateTime("deletedate").nullable();
-    });
-    await db.schema.createTableIfNotExists("productstock",function(table){
-        table.binary("id",16).notNullable().primary();
-
-        table.binary("productid",16).notNullable();
         table.integer("stok");
-        table.double("alısfiyati");
-        
+        table.double("alisfiyati");
         table.text("descript");
         table.dateTime("createdate").notNullable().defaultTo(db.fn.now());
         table.dateTime("updatedate").notNullable().defaultTo(db.fn.now());
