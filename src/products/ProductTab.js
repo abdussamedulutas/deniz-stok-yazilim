@@ -19,6 +19,27 @@ export default function ProductTab()
         setRows(rows);
     };
     updateData();
+    async function doSearch(word)
+    {
+        if(word.length == 0){
+            return updateData()
+        };
+        let _rows = await ipcRenderer.invoke("db",{
+            action:"search",
+            class:"product",
+            limit:1000,
+            data:{
+                isim:word,
+                marka:word,
+                model:word,
+                satisfiyati:word,
+                alisfiyati:word,
+                descript:word
+            }
+        });
+        console.log(_rows);
+        setRows(_rows);
+    };
     async function handleProductAdd()
     {
         await ipcRenderer.invoke("modal","addproduct");
@@ -26,13 +47,11 @@ export default function ProductTab()
     }
     async function handleProductEdit(id)
     {
-        console.log(arguments);
         await ipcRenderer.invoke("modal","updateproduct",id);
         await updateData();
     }
     async function handleDelete(ids)
     {
-        console.log(ids);
         setDeleteRow(ids);
     }
     async function handleDeleteProduct()
@@ -60,6 +79,7 @@ export default function ProductTab()
                         </InputAdornment>
                     )
                 }}
+                onKeyUp={e => doSearch(e.target.value)}
                 style={{marginLeft:"10px",...verticalCenter}}
             />
             <Button
@@ -109,11 +129,11 @@ function ProductTabOptions(props)
     };
     const handleEdit = e => {
         handleClose();
-        props.onEditItem && props.onEditItem(props.id);
+        props.onEditItem && props.onEditItem(props.row);
     };
     const handleDelete = e => {
         handleClose();
-        props.onDeleteItem && props.onDeleteItem([props.id]);
+        props.onDeleteItem && props.onDeleteItem([props.row]);
     };
   
     const handleClose = () => {
@@ -155,7 +175,10 @@ function ProductGrid(props)
         props.onSelectionChanged && props.onSelectionChanged(e.rowIds);
     };
     const handleEdit = e => {
-        props.onEditItem && props.onEditItem(typeof e == "number" ? e : selectedItem[0]);
+        props.onEditItem && props.onEditItem(selectedItem[0]);
+    };
+    const handleEditMenu = e => {
+        props.onEditItem && props.onEditItem(e);
     };
     const handleDelete = e => {
         props.onDeleteItem && props.onDeleteItem(e instanceof Array ? e : selectedItem);
@@ -212,7 +235,7 @@ function ProductGrid(props)
                 {
                     field:"I",
                     headerName:" ",
-                    renderCell:(e)=> <ProductTabOptions row={e.row.id} onEditItem={handleEdit} onDeleteItem={handleDelete} />,
+                    renderCell:(e)=> <ProductTabOptions row={e.row.id} onEditItem={handleEditMenu} onDeleteItem={handleDelete} />,
                     flex:5,
                     sortable:false,
                     filterable:false

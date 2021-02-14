@@ -213,10 +213,9 @@ ipcMain.handle("db",async function(event,pack){
             return id.toString("hex")
         }
         case "update":{
-            await db.table(pack.class).update(pack.data).where({
+            return await db.table(pack.class).update(pack.data).where({
                 id:Buffer.from(pack.id,"hex")
             });
-            return id.toString("hex")
         }
         case "list":{
             let sql = db.table(pack.class).select(pack.column ? pack.column : "*");
@@ -242,32 +241,35 @@ ipcMain.handle("db",async function(event,pack){
             )
         }
         case "search":{
-            let t = db.table(pack.class);
+            let sql = db.table(pack.class);
             if(pack.withDeleted == null) sql.whereNull("deletedate");
+            sql.orWhere(e => {
+                for(let key in pack.data) e.orWhere(key,'like','%'+pack.data[key]+'%')
+            })
             if(typeof pack.limit == "number")  sql.limit(pack.limit);
             if(typeof pack.offset == "number")  sql.offset(pack.offset);
-            for(let key in pack.data)
-            {
-                let value = pack.data[key];
-                t.where(key,'like','%'+value+'%')
-            };
-            return (await t).map(idBufferToHex);
+            let result = (await sql).map(idBufferToHex);
+            return result;
         }
         case "delete":{
             if(typeof pack.id == "number")
             {
-                return await db.table(pack.class).delete().where({
+                return await db.table(pack.class).update({
+                    deletedate:db.fn.now()
+                }).where({
                     id:Buffer.from(pack.id,"hex")
                 })
             }else{
                 let ids = pack.id.map(i => Buffer.from(i,"hex"));
-                return await db.table(pack.class).delete().whereIn("id",ids)
+                return await db.table(pack.class).update({
+                    deletedate:db.fn.now()
+                }).whereIn("id",ids)
             }
         }
     }
 })
 function idBufferToHex(i)
 {
-    if(i.id) i.id = i.id.toString("hex");
+    if(i && i.id) i.id = i.id.toString("hex");
     return i;
 }
