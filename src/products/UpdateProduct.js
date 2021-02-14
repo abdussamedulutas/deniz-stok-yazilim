@@ -116,7 +116,7 @@ export default function UpdateProduct(props)
                 </Box>
                 {!successMessage && showSave && <Box style={styles} textAlign="center">
                     <Button variant="outlined" color="primary" style={{marginTop:"auto"}} onClick={handleClick}>
-                        Kaydet
+                        Güncelle
                     </Button>
                 </Box>}
                 <Box style={styles} textAlign="center">

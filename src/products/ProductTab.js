@@ -26,7 +26,7 @@ export default function ProductTab()
     }
     async function handleProductEdit(id)
     {
-        console.log(id);
+        console.log(arguments);
         await ipcRenderer.invoke("modal","updateproduct",id);
         await updateData();
     }
@@ -109,11 +109,11 @@ function ProductTabOptions(props)
     };
     const handleEdit = e => {
         handleClose();
-        props.onEditItem && props.onEditItem(props.row.id);
+        props.onEditItem && props.onEditItem(props.id);
     };
     const handleDelete = e => {
         handleClose();
-        props.onDeleteItem && props.onDeleteItem([props.row.id]);
+        props.onDeleteItem && props.onDeleteItem([props.id]);
     };
   
     const handleClose = () => {
@@ -212,7 +212,7 @@ function ProductGrid(props)
                 {
                     field:"I",
                     headerName:" ",
-                    renderCell:(e)=> <ProductTabOptions row={e.row} onEditItem={handleEdit} onDeleteItem={handleDelete} />,
+                    renderCell:(e)=> <ProductTabOptions row={e.row.id} onEditItem={handleEdit} onDeleteItem={handleDelete} />,
                     flex:5,
                     sortable:false,
                     filterable:false
