@@ -209,10 +209,13 @@ ipcMain.handle("db",async function(event,pack){
         case "add":{
             let id = randomId();
             pack.data.id = id;
+            pack.data.createdate = db.fn.now();
             await db.table(pack.class).insert(pack.data);
             return id.toString("hex")
         }
         case "update":{
+            if(pack.data?.id) delete pack.data.id;
+            pack.data.updatedate = db.fn.now();
             return await db.table(pack.class).update(pack.data).where({
                 id:Buffer.from(pack.id,"hex")
             });
@@ -231,14 +234,15 @@ ipcMain.handle("db",async function(event,pack){
                     id:Buffer.from(pack.id,"hex")
                 })
             };
-            return (await sql).map(idBufferToHex);
+            let result = await sql;
+            console.log("Ürünler listelendi")
+            return result.map(idBufferToHex);
         }
         case "get":{
-            return idBufferToHex(
-                await db.table(pack.class).select("*").where({
-                    id:Buffer.from(pack.id,"hex")
-                }).limit(1).first()
-            )
+            let item = await db.table(pack.class).select("*").where({
+                id:Buffer.from(pack.id,"hex")
+            }).limit(1).first();    
+            return idBufferToHex(item);
         }
         case "search":{
             let sql = db.table(pack.class);

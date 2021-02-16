@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, InputAdornment, Menu,MenuItem, TextField } from "@material-ui/core";
-import { ApiContext, DataGrid } from "@material-ui/data-grid";
-import { Add, Beenhere, Description, MoreVert, PinDropSharp, Remove, Search } from "@material-ui/icons";
+import {  DataGrid } from "@material-ui/data-grid";
+import { Add, Beenhere, Description, MoreVert, Remove, Search } from "@material-ui/icons";
 let {ipcRenderer} = window.require("electron");
 
 export default function ProductTab()
@@ -18,10 +18,12 @@ export default function ProductTab()
         });
         setRows(rows);
     };
-    updateData();
+    useEffect(function(){
+        updateData()
+    },[]);
     async function doSearch(word)
     {
-        if(word.length == 0){
+        if(word.length === 0){
             return updateData()
         };
         let _rows = await ipcRenderer.invoke("db",{
@@ -98,7 +100,7 @@ export default function ProductTab()
             row={rows}
         />
         <Dialog
-            open={deleteRows.length != 0}
+            open={deleteRows.length !== 0}
             onClose={() => setDeleteRow([])}
         >
             <DialogTitle>Dikkat !</DialogTitle>
@@ -244,12 +246,12 @@ function ProductGrid(props)
             rows={props.row}
         />
     </Box>
-    {selectedItem.length != 0 && <Box flex="0 0 auto" display="flex" marginTop="10px">
+    {selectedItem.length !== 0 && <Box flex="0 0 auto" display="flex" marginTop="10px">
         <Button variant="contained" color="secondary" onClick={handleDelete}>
             <Remove />
             Seçileni Sil
         </Button>
-        {selectedItem.length == 1 && <Button variant="contained" color="secondary" style={{backgroundColor:"#00dd00",marginLeft:"10px"}} onClick={handleEdit}>
+        {selectedItem.length === 1 && <Button variant="contained" color="secondary" style={{backgroundColor:"#00dd00",marginLeft:"10px"}} onClick={handleEdit}>
             <Description />
             Seçileni Düzenle
         </Button>}

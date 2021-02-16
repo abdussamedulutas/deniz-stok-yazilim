@@ -25,8 +25,12 @@ export default function UpdateProduct(props)
             action:"get",
             class:"product",
             id:props.args[0]
-        }).then(_product => setDetails(_product))
-    },[props.args[0]]);
+        }).then(_product => {
+            console.log(_product);
+            setDetails(_product);
+            setShowSave(_product.isim && parseInt(_product.satisfiyati) > 0 && parseInt(_product.stok) > 0)
+        });
+    },[props.args]);
     function handleChange(name,value){
         let nproduct = {
             ...product,
