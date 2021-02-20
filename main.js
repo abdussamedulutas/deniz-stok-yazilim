@@ -16,13 +16,16 @@ class MyWindows{
     }
     constructor({page,parentWin,isModal,w,h,args}){
         let {screen} = require("electron");
-        let size = screen.getPrimaryDisplay().workAreaSize
+        let size = screen.getPrimaryDisplay().size
+        let width = size.width * w;
+        let height = size.height * h;
         this.window = new BrowserWindow({
-            width:size.width * w,
-            height:size.height * h,
+            width:width,
+            height:height,
             webPreferences:{
                 nodeIntegration:true,
-                defaultEncoding:"utf8"
+                defaultEncoding:"utf8",
+                contextIsolation:false
             },
             parent:parentWin,
             modal:isModal?true:false,
@@ -36,6 +39,7 @@ class MyWindows{
         this.window.webContents.on("dom-ready",() => {
             this.window.webContents.send("show-page",page,args);
             this.window.show()
+            this.window.setSize(width,height,true)
         });
     }
 }
@@ -85,9 +89,9 @@ async function controlMain()
         })
     });
     app.setPath("userData",__dirname+"/profile");
-    if(await ModalWindow.show({page:"login",w:0.3,h:0.5}))
-    {
-        main = MyWindows.show({page:"main",w:0.8,h:0.8});
-    }else app.exit(0)
+    //if(await ModalWindow.show({page:"login",w:0.3,h:0.5}))
+    //{
+        main = MyWindows.show({page:"main",w:0.8,h:0.9});
+    //}else app.exit(0)
 }
 require("./bin/db.js")

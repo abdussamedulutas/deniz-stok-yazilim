@@ -45,7 +45,7 @@ let db = knex({
         table.dateTime("updatedate").notNullable().defaultTo(db.fn.now());
         table.dateTime("deletedate").nullable();
     });
-    await db.schema.createTableIfNotExists("client",function(table){
+    await db.schema.createTableIfNotExists("customer",function(table){
         table.binary("id",16).notNullable().primary();
 
         table.text("isim");
@@ -80,7 +80,7 @@ let db = knex({
     await db.schema.createTableIfNotExists("invoice",function(table){
         table.binary("id",16).notNullable().primary();
 
-        table.binary("clientid",16).notNullable();
+        table.binary("customerid",16).notNullable();
         table.double("tutar");
         table.binary("paymentid",16).notNullable();
         
@@ -131,7 +131,7 @@ KULLANICI (users)
     updatedate
     deletedate
     
-Müşteriler (clients)
+Müşteriler (customer)
     ID
     isim
     soyisim

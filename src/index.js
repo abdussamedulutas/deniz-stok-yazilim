@@ -1,7 +1,9 @@
 import LoginScreen from "./Login";
 import MainScreen from "./Main";
-import AddProductScreen from "./products/AddProduct.js";
+import AddProductScreen from "./products/AddProduct";
 import UpdateProductScreen from "./products/UpdateProduct";
+import AddCustomerScreen from "./customer/AddCustomer";
+import UpdateCustomerScreen from "./customer/UpdateCustomer";
 
 
 import { render } from "react-dom";
@@ -24,7 +26,7 @@ function App()
         {screen ?
             <Realitive screen={screen.page} args={screen.args} />
         : null}
-    </>;
+    </>
 }
 
 function Realitive(props)
@@ -42,6 +44,12 @@ function Realitive(props)
         }
         case "updateproduct":{
             return <UpdateProductScreen args={props.args}/>;
+        }
+        case "addcustomer":{
+            return <AddCustomerScreen args={props.args}/>;
+        }
+        case "updatecustomer":{
+            return <UpdateCustomerScreen args={props.args}/>;
         }
         default:return <></>;
     }
